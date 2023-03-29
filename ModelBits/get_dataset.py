@@ -11,11 +11,14 @@ path = os.path.dirname(os.path.abspath(__file__))
 
 
 class Get_Dataset(Dataset):
-    def __init__(self, train = True, validate = False,pseudolabels = False):
+    def __init__(self, fold_indices=None,train = True, pseudolabels = False):
         super().__init__()
         self.train = train
         self.pseudolabels = pseudolabels
         self.sentences, self.labels = self.load_data()
+        
+        if fold_indices is not None:
+             self.validation_split(fold_indices)
         
     def __len__(self):
             return len(self.labels)
@@ -30,21 +33,22 @@ class Get_Dataset(Dataset):
         if self.train:
             sentences = np.load(str(path) + '/Data/train_sentences__13_03_2023__04_38_26.npy',allow_pickle=True)
             labels = np.load(str(path) + '/Data/train_labels__13_03_2023__04_38_26.npy',allow_pickle=True)
-            
         else:
             sentences = np.load(str(path) + '/Data/test_sentences__13_03_2023__04_38_26.npy',allow_pickle=True)
             labels = np.load(str(path) + '/Data/test_labels__13_03_2023__04_38_26.npy',allow_pickle=True)
 
         labelled_indices = np.where(labels!=7)[0]
-
         labels = labels.tolist()
 
         if self.pseudolabels == False:
-            sentences = [sentences[i] for i in labelled_indices]
-            labels = [labels[i] for i in labelled_indices]
+            sentences = np.array([sentences[i] for i in labelled_indices])
+            labels = np.array([labels[i] for i in labelled_indices])
 
         return torch.tensor(sentences), torch.tensor(labels)
-
+    
+    def validation_split(self, fold_indices):
+         self.sentences = self.sentences[fold_indices]
+         self.labels = self.labels[fold_indices]
 
 '''     
 dataset = tokenizer()
