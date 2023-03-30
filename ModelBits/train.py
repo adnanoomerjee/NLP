@@ -33,8 +33,6 @@ def train(network, device, trainset, testset, batch_size=4, lr = 0.0005, num_wor
     ## train
     for epoch in range(epochs):  # loop over the dataset multiple times
         
-        network.train()
-        
         running_loss = 0.0
         for i, (inputs, labels) in enumerate(trainloader, 0):
             # get the inputs; data is a list of [inputs, labels]
@@ -60,7 +58,6 @@ def train(network, device, trainset, testset, batch_size=4, lr = 0.0005, num_wor
 
         if test_on_epoch:
 
-            network.eval()
             y_true = []
             y_pred = []
 
@@ -105,25 +102,24 @@ def train(network, device, trainset, testset, batch_size=4, lr = 0.0005, num_wor
     return val_metrics
  
 
-if __name__ == "__main__":
 
-    def device():
-        if torch.backends.mps.is_available():
-            device = torch.device("mps") 
-        elif torch.cuda.is_available():
-            device = torch.device('cuda')
-        else:
-            device = torch.device('cpu')
-        return device
-    
-    trainset = Get_Dataset(train=True)
-    testset = Get_Dataset(train=True, validate=True)
+def device():
+    if torch.backends.mps.is_available():
+        device = torch.device("mps") 
+    elif torch.cuda.is_available():
+        device = torch.device('cuda')
+    else:
+        device = torch.device('cpu')
+    return device
 
-    device = device()
+trainset = Get_Dataset(train=True)
+testset = Get_Dataset(train=True, validate=True)
 
-    #checkpoint = torch.load(str(path) + '/Model/model1_checkpoint_epoch_5.pt')
-    #model.load_state_dict(checkpoint['model_state_dict'])
+device = device()
+
+#checkpoint = torch.load(str(path) + '/Model/model1_checkpoint_epoch_5.pt')
+#model.load_state_dict(checkpoint['model_state_dict'])
 
 
-    network = network1()
-    train(network, device=device, trainset=trainset, testset=testset)
+network = network1()
+train(network, device=device, trainset=trainset, testset=testset)
