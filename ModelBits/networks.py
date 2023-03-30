@@ -227,7 +227,7 @@ class network3(nn.Module):
         return x   
     
 '''
-'''
+
 
 class network1(nn.Module):
     def __init__(self, input_size = 768, hidden_size = 768, L = 3, bidirectional = True, num_LSTM_layers = 1, dropout = 0.2, embed = 'bert-base-cased', batch_size = 4):
@@ -253,7 +253,7 @@ class network1(nn.Module):
             bidirectional = bidirectional,
             batch_first=True)
         self.fc1 = nn.Linear(hidden_size*self.D, 192)
-        self.fc2 = nn.Linear(192, 3)
+        self.fc2 = nn.Linear(192, 2)
         self.dropout = torch.nn.Dropout(dropout)
         
 
@@ -274,4 +274,4 @@ class network1(nn.Module):
         x = self.dropout(x)
         x = self.fc2(x)
         return x
-    '''
+    

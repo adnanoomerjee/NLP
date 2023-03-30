@@ -11,14 +11,14 @@ path = os.path.dirname(os.path.abspath(__file__))
 
 
 class Get_Dataset(Dataset):
-    def __init__(self, validate = False,train = True, pseudolabels = False):
+    def __init__(self, fold_indices=None,train = True, pseudolabels = False):
         super().__init__()
         self.train = train
         self.pseudolabels = pseudolabels
         self.sentences, self.labels = self.load_data()
         
-        if validate:
-             self.validation_split()
+        if fold_indices is not None:
+             self.validation_split(fold_indices)
         
     def __len__(self):
             return len(self.labels)
@@ -46,21 +46,12 @@ class Get_Dataset(Dataset):
 
         labels = labels - 1
         labels[np.where(labels == -1)] = 0
-
-        minority_labels = labels[np.where(labels == 1)]
-        minority_sentences = sentences[np.where(labels == 1)]
-        labels = np.append(np.append(labels, minority_labels,axis=0),minority_labels,axis=0)
-        sentences = np.append(np.append(sentences, minority_sentences,axis=0),minority_sentences,axis=0)
-        
         return torch.tensor(sentences), torch.tensor(labels).squeeze()
     
-    def validation_split(self):
-        np.random.seed(0) 
-        ind = np.random.choice(len(self.labels), size = int(len(self.labels)*0.1))
-         
-        self.sentences = self.sentences[ind]
-        self.labels = self.labels[ind]
-
+    def validation_split(self, fold_indices):
+         self.sentences = self.sentences[fold_indices]
+         self.labels = self.labels[fold_indices]
+Get_Dataset()
 '''     
 dataset = tokenizer()
 trainset, testset = random_split(dataset, [0.8,0.2])

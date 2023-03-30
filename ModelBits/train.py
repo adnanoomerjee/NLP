@@ -12,14 +12,14 @@ from sklearn.metrics import precision_recall_fscore_support
 
 path = os.path.dirname(os.path.abspath(__file__))
 
-def train(network, device, trainset, testset, batch_size=4, lr = 0.001, num_workers = 0, epochs=15, test_on_epoch = True, save_on_epoch = False):
+def train(network, device, trainset, testset, batch_size=4, lr = 0.001, num_workers = 0, epochs=20, test_on_epoch = True, save_on_epoch = False):
 
-    network.train()
-
+    '''
     if test_on_epoch:
         val_metrics = np.zeros((epochs,4))
     else:
         val_metrics = None
+    '''
 
     trainloader = DataLoader(trainset, batch_size=batch_size, shuffle=True, num_workers=num_workers, pin_memory = True, drop_last=True)
     testloader = DataLoader(testset, batch_size=batch_size, shuffle=True, num_workers=num_workers, pin_memory = True, drop_last = True)
@@ -27,21 +27,25 @@ def train(network, device, trainset, testset, batch_size=4, lr = 0.001, num_work
     
     ## loss and optimiser
     criterion = torch.nn.CrossEntropyLoss()
-    optimizer = optim.Adam(model.parameters(), lr = lr)
+    optimizer = optim.SGD(model.parameters(), lr = lr)
     #scheduler = torch.optim.lr_scheduler.StepLR(optimizer, 5, gamma=0.5, last_epoch =- 1)
     t0 = time.time()
     ## train
     for epoch in range(epochs):  # loop over the dataset multiple times
         
+        network.train()
+        
         running_loss = 0.0
         for i, (inputs, labels) in enumerate(trainloader, 0):
             # get the inputs; data is a list of [inputs, labels]
-            inputs, labels = inputs.to(device), labels.to(device)
+            inputs, labels = inputs.to(device), labels.type(torch.LongTensor).to(device)
             # zero the parameter gradients
             optimizer.zero_grad()
 
             # forward + backward + optimize
             outputs = model(inputs)
+            _, predicted = torch.max(outputs, 1)
+
             loss = criterion(outputs, labels)
             loss.backward()
             torch.nn.utils.clip_grad_norm_(model.parameters(), 1)
@@ -67,17 +71,17 @@ def train(network, device, trainset, testset, batch_size=4, lr = 0.001, num_work
                     test_inputs, test_labels = test_inputs.to(device), test_labels.to(device)
                     outputs = model(test_inputs)
                     _, predicted = torch.max(outputs, 1)
-                    
+
                     y_true.extend(test_labels.cpu().squeeze().tolist())
                     y_pred.extend(predicted.cpu().squeeze().tolist())
-        
+                    
                     print('Epoch ' + str(epoch+1) + ', Loss: ' + str(running_loss /(len(trainset)/batch_size)) + ', Running test: Batch ' + str(i+1) + '/' + str(int(len(testset)/batch_size)), end='\r')
-
-                precision, recall, f1, _ = precision_recall_fscore_support(y_true, y_pred, average='weighted')
+ 
+                precision, recall, f1, _ = precision_recall_fscore_support(y_true, y_pred)
                 accuracy = np.sum(np.array(y_true) == np.array(y_pred)) / len(y_true)
-                
-                val_metrics[epoch,:3] = np.array([precision, recall, f1])
-                val_metrics[epoch,3] = np.array([accuracy])
+                print(precision, recall, f1, accuracy)
+                #val_metrics[epoch,:3] = np.array([precision, recall, f1])
+                #val_metrics[epoch,3] = np.array([accuracy])
 
                 print('Epoch ' + str(epoch+1) + ', Loss: ' + str(running_loss /(len(trainset)/batch_size)) + ', Test set accuracy: ' + str(accuracy.item()))
             
@@ -113,7 +117,7 @@ if __name__ == "__main__":
         return device
     
     trainset = Get_Dataset(train=True)
-    testset = Get_Dataset(train=False)
+    testset = Get_Dataset(train=True, validate=True)
 
     device = device()
 
