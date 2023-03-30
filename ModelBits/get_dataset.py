@@ -16,9 +16,7 @@ class Get_Dataset(Dataset):
         self.train = train
         self.pseudolabels = pseudolabels
         self.sentences, self.labels = self.load_data()
-        
-        if validate:
-             self.validation_split()
+        self.validation_split(validate)
         
     def __len__(self):
             return len(self.labels)
@@ -54,10 +52,13 @@ class Get_Dataset(Dataset):
         
         return torch.tensor(sentences), torch.tensor(labels).squeeze()
     
-    def validation_split(self):
+    def validation_split(self, validate):
         np.random.seed(0) 
-        ind = np.random.choice(len(self.labels), size = int(len(self.labels)*0.1))
-         
+        if validate:
+            ind = np.random.choice(len(self.labels), size = int(len(self.labels)*0.1))
+        else:
+            ind = np.random.choice(len(self.labels), size = int(len(self.labels)*0.9))
+        
         self.sentences = self.sentences[ind]
         self.labels = self.labels[ind]
 
