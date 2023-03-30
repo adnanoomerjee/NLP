@@ -12,7 +12,7 @@ from sklearn.metrics import precision_recall_fscore_support
 
 path = os.path.dirname(os.path.abspath(__file__))
 
-def train(network, device, trainset, testset, batch_size=4, lr = 0.001, num_workers = 0, epochs=20, test_on_epoch = True, save_on_epoch = False):
+def train(network, device, trainset, testset, batch_size=4, lr = 0.0005, num_workers = 0, epochs=20, test_on_epoch = True, save_on_epoch = False):
 
     '''
     if test_on_epoch:
@@ -27,7 +27,7 @@ def train(network, device, trainset, testset, batch_size=4, lr = 0.001, num_work
     
     ## loss and optimiser
     criterion = torch.nn.CrossEntropyLoss()
-    optimizer = optim.SGD(model.parameters(), lr = lr)
+    optimizer = optim.Adam(model.parameters(), lr = lr)
     #scheduler = torch.optim.lr_scheduler.StepLR(optimizer, 5, gamma=0.5, last_epoch =- 1)
     t0 = time.time()
     ## train
