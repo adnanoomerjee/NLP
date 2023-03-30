@@ -12,7 +12,7 @@ from sklearn.metrics import precision_recall_fscore_support
 
 path = os.path.dirname(os.path.abspath(__file__))
 
-def train(network, device, trainset, testset, batch_size=4, lr = 0.0005, num_workers = 0, epochs=20, test_on_epoch = True, save_on_epoch = False):
+def train(network, device, trainset, testset, batch_size=4, lr = 0.0005, num_workers = 0, epochs=20, test_on_epoch = True, save_on_epoch = True):
 
     '''
     if test_on_epoch:
@@ -77,9 +77,7 @@ def train(network, device, trainset, testset, batch_size=4, lr = 0.0005, num_wor
                 precision, recall, f1, _ = precision_recall_fscore_support(y_true, y_pred)
                 accuracy = np.sum(np.array(y_true) == np.array(y_pred)) / len(y_true)
                 print(precision, recall, f1, accuracy)
-                #val_metrics[epoch,:3] = np.array([precision, recall, f1])
-                #val_metrics[epoch,3] = np.array([accuracy])
-
+        
                 print('Epoch ' + str(epoch+1) + ', Loss: ' + str(running_loss /(len(trainset)/batch_size)) + ', Test set accuracy: ' + str(accuracy.item()))
             
         print('')
@@ -99,7 +97,7 @@ def train(network, device, trainset, testset, batch_size=4, lr = 0.0005, num_wor
             print('Model saved.')
 
     print('Training done.')
-    return val_metrics
+
  
 
 
