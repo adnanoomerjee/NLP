@@ -7,7 +7,7 @@ import numpy as np
 from networks import *
 import time
 import os
-from get_dataset_old import Get_Dataset
+from get_dataset import Get_Dataset
 from sklearn.metrics import precision_recall_fscore_support
 
 path = os.path.dirname(os.path.abspath(__file__))
