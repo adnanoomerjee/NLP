@@ -69,8 +69,8 @@ if __name__ == "__main__":
                 
                 # print statistics
                 running_loss += float(loss.item())
-                if i%1000 == 0:
-                  print('Epoch ' + str(epoch+1) + ', Batch ' + str((i+1)) + '/' + str(int(len(trainset)/batch_size)) + ', loss: ' + str(running_loss /(i+1)) + ', Time from start: ' +str(time.time()-t0))
+
+                print('Epoch ' + str(epoch+1) + ', Batch ' + str((i+1)) + '/' + str(int(len(trainset)/batch_size)) + ', loss: ' + str(running_loss /(i+1)) + ', Time from start: ' +str(time.time()-t0),end='\r')
             scheduler.step()
             print('')
 
@@ -94,7 +94,7 @@ if __name__ == "__main__":
                 accuracy = np.sum(np.array(y_true) == np.array(y_pred)) / len(y_true)
                 print(precision, recall, f1, accuracy)
                 
-                print('Epoch ' + str(epoch+1) + ', Loss: ' + str(running_loss /(len(trainset)/batch_size)) + ', Test set accuracy: ' + str(accuracy.item()))
+                print('Epoch ' + str(epoch+1) + ', Loss: ' + str(running_loss /(len(trainset)/batch_size)) + ', Test set accuracy: ' + str(accuracy.item()),end='\r')
             
                 
             print('')
