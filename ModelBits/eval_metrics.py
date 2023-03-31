@@ -87,7 +87,6 @@ if __name__ == "__main__":
             weighted_precisions.append(weighted_precision)
             weighted_recalls.append(weighted_recall)
             weighted_f1s.append(weighted_f1)
-            accuracies.append(accuracy)
 
         validation_scores = dict(network = model.__class__.__name__,
         precision = np.mean(precisions), 
@@ -95,9 +94,8 @@ if __name__ == "__main__":
         f1_score = np.mean(f1s),
         weighted_precision = np.mean(weighted_precisions), 
         weighted_recall = np.mean(weighted_recalls), 
-        weighted_f1_score = np.mean(weighted_f1s), 
-        accuracy = np.mean(accuracies))
-
+        weighted_f1_score = np.mean(weighted_f1s))
+        
         validation_df = pd.DataFrame.from_dict(validation_scores)
 
         return validation_df
