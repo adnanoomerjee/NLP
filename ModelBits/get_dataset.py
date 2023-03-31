@@ -45,22 +45,25 @@ class Get_Dataset(Dataset):
         labels = labels - 1
         labels[np.where(labels == -1)] = 0
 
-        minority_labels = labels[np.where(labels == 1)]
+        ''' minority_labels = labels[np.where(labels == 1)]
         minority_sentences = sentences[np.where(labels == 1)]
         labels = np.append(np.append(labels, minority_labels,axis=0),minority_labels,axis=0)
         sentences = np.append(np.append(sentences, minority_sentences,axis=0),minority_sentences,axis=0)
+        '''
         
         return torch.tensor(sentences), torch.tensor(labels).squeeze()
     
     def validation_split(self, validate):
-        np.random.seed(0) 
+        np.random.seed(0)
+        ind = np.random.choice(len(self.labels), size = int(len(self.labels)*0.1))
         if validate:
-            ind = np.random.choice(len(self.labels), size = int(len(self.labels)*0.1))
+            self.sentences = self.sentences[ind,:]
+            self.labels = self.labels[ind]
         else:
-            ind = np.random.choice(len(self.labels), size = int(len(self.labels)*0.9))
+            self.sentences = np.delete(self.sentences,ind, axis=0)
+            self.labels = np.delete(self.labels,ind)
         
-        self.sentences = self.sentences[ind]
-        self.labels = self.labels[ind]
+        
 
 '''     
 dataset = tokenizer()

@@ -12,7 +12,7 @@ from sklearn.metrics import precision_recall_fscore_support
 
 path = os.path.dirname(os.path.abspath(__file__))
 
-def train(network, device, trainset, testset, batch_size=4, lr = 0.0005, num_workers = 0, epochs=20, test_on_epoch = True, save_on_epoch = True):
+def train(network, device, trainset, testset, batch_size=4, lr = 0.001, num_workers = 0, epochs=20, test_on_epoch = True, save_on_epoch = True):
 
     '''
     if test_on_epoch:
@@ -25,9 +25,11 @@ def train(network, device, trainset, testset, batch_size=4, lr = 0.0005, num_wor
     testloader = DataLoader(testset, batch_size=batch_size, shuffle=True, num_workers=num_workers, pin_memory = True, drop_last = True)
     model = network.to(device)
     
+    model.train()
+   
     ## loss and optimiser
     criterion = torch.nn.CrossEntropyLoss()
-    optimizer = optim.Adam(model.parameters(), lr = lr)
+    optimizer = optim.SGD(model.parameters(), lr = lr)
     #scheduler = torch.optim.lr_scheduler.StepLR(optimizer, 5, gamma=0.5, last_epoch =- 1)
     t0 = time.time()
     ## train
@@ -56,7 +58,7 @@ def train(network, device, trainset, testset, batch_size=4, lr = 0.0005, num_wor
         #scheduler.step()
         print('')
 
-        if test_on_epoch:
+        if test_on_epoch and epoch%2 == 0:
 
             y_true = []
             y_pred = []
@@ -119,5 +121,10 @@ device = device()
 #model.load_state_dict(checkpoint['model_state_dict'])
 
 
-network = network1()
+network = network2()
+
+train(network, device=device, trainset=trainset, testset=testset)
+
+network = network3()
+
 train(network, device=device, trainset=trainset, testset=testset)
