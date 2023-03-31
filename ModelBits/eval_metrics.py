@@ -108,7 +108,7 @@ if __name__ == "__main__":
     network2 = network2(input_size=input_size, hidden_size=hidden_size, L = L, batch_size = batch_size).to(device)
     network2_df = evaluate(network2)
 
-    scores = network2.append(network2)
+    scores = network2.append(network2, ignore_index = True)
 
     print("Evaluation metrics:")
     print(scores)
