@@ -28,7 +28,7 @@ if __name__ == "__main__":
     testset = Get_Dataset(train=False, validate=True)
     
     batch_size = 4
-    epochs = 5
+    epochs = 17
     input_size = 768
     hidden_size = 768
     L = 3
@@ -115,8 +115,14 @@ if __name__ == "__main__":
             
             print('Model saved.')
 
-    network2 = network2(input_size=input_size, hidden_size=hidden_size, L = L, batch_size = batch_size).to(device)
-    train(network2)
-
     network1 = network1(input_size=input_size, hidden_size=hidden_size, L = L, batch_size = batch_size).to(device)
     train(network1)
+    network2 = network2(input_size=input_size, hidden_size=hidden_size, L = L, batch_size = batch_size).to(device)
+    train(network2)
+    network3 = network3(input_size=input_size, hidden_size=hidden_size, L = L, batch_size = batch_size).to(device)
+    train(network3)
+
+    
+
+    
+
