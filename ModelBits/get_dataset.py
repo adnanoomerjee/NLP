@@ -42,8 +42,8 @@ class Get_Dataset(Dataset):
             sentences = np.array([sentences[i] for i in labelled_indices])
             labels = np.array([labels[i] for i in labelled_indices])
 
-        labels = labels - 1
-        labels[np.where(labels == -1)] = 0
+        #labels = labels - 1
+        #labels[np.where(labels == -1)] = 0
 
         ''' minority_labels = labels[np.where(labels == 1)]
         minority_sentences = sentences[np.where(labels == 1)]
