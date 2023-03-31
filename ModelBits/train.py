@@ -48,7 +48,7 @@ if __name__ == "__main__":
         ## loss and optimiser
         criterion = torch.nn.CrossEntropyLoss()
         optimizer = optim.SGD(model.parameters(), lr = 0.001, momentum=0.9)
-        scheduler = torch.optim.lr_scheduler.StepLR(optimizer, 2, gamma=0.5, last_epoch =- 1)
+        #scheduler = torch.optim.lr_scheduler.StepLR(optimizer, 2, gamma=0.5, last_epoch =- 1)
         t0 = time.time()
         ## train
         for epoch in range(epochs):  # loop over the dataset multiple times
@@ -71,7 +71,7 @@ if __name__ == "__main__":
                 running_loss += float(loss.item())
 
                 print('Epoch ' + str(epoch+1) + ', Batch ' + str((i+1)) + '/' + str(int(len(trainset)/batch_size)) + ', loss: ' + str(running_loss /(i+1)) + ', Time from start: ' +str(time.time()-t0),end='\r')
-            scheduler.step()
+            #scheduler.step()
             print('')
 
             y_true = []
