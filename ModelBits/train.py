@@ -87,14 +87,14 @@ if __name__ == "__main__":
 
                     y_true.extend(test_labels.cpu().squeeze().tolist())
                     y_pred.extend(predicted.cpu().squeeze().tolist())
-                    if i%100==0:
-                      print('Epoch ' + str(epoch+1) + ', Loss: ' + str(running_loss /(len(trainset)/batch_size)) + ', Running test: Batch ' + str(i+1) + '/' + str(int(len(testset)/batch_size)))
+
+                    print('Epoch ' + str(epoch+1) + ', Loss: ' + str(running_loss /(len(trainset)/batch_size)) + ', Running test: Batch ' + str(i+1) + '/' + str(int(len(testset)/batch_size)),end='\r')
  
                 precision, recall, f1, _ = precision_recall_fscore_support(y_true, y_pred)
                 accuracy = np.sum(np.array(y_true) == np.array(y_pred)) / len(y_true)
                 print(precision, recall, f1, accuracy)
                 
-                print('Epoch ' + str(epoch+1) + ', Loss: ' + str(running_loss /(len(trainset)/batch_size)) + ', Test set accuracy: ' + str(accuracy.item()),end='\r')
+                print('Epoch ' + str(epoch+1) + ', Loss: ' + str(running_loss /(len(trainset)/batch_size)) + ', Test set accuracy: ' + str(accuracy.item()))
             
                 
             print('')
