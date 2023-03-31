@@ -11,12 +11,12 @@ path = os.path.dirname(os.path.abspath(__file__))
 
 
 class Get_Dataset(Dataset):
-    def __init__(self, validate = False, train = True, pseudolabels = False):
+    def __init__(self, validate = False,train = True, pseudolabels = False):
         super().__init__()
         self.train = train
         self.pseudolabels = pseudolabels
         self.sentences, self.labels = self.load_data()
-        #self.validation_split(validate)
+        self.validation_split(validate)
         
     def __len__(self):
             return len(self.labels)
@@ -32,18 +32,27 @@ class Get_Dataset(Dataset):
             sentences = np.load(str(path) + '/Data/train_sentences__13_03_2023__04_38_26.npy',allow_pickle=True)
             labels = np.load(str(path) + '/Data/train_labels__13_03_2023__04_38_26.npy',allow_pickle=True)
         else:
-            sentences = np.load(str(path) + '/Data/test_sentences__13_03_2023__04_38_26.npy',allow_pickle=True).tolist()
+            sentences = np.load(str(path) + '/Data/test_sentences__13_03_2023__04_38_26.npy',allow_pickle=True)
             labels = np.load(str(path) + '/Data/test_labels__13_03_2023__04_38_26.npy',allow_pickle=True)
 
         labelled_indices = np.where(labels!=7)[0]
         labels = labels.tolist()
 
         if self.pseudolabels == False:
-            sentences = [sentences[i] for i in labelled_indices]
-            labels = [labels[i] for i in labelled_indices]
+            sentences = np.array([sentences[i] for i in labelled_indices])
+            labels = np.array([labels[i] for i in labelled_indices])
 
-        return torch.tensor(sentences), torch.tensor(labels)
+        #labels = labels - 1
+        #labels[np.where(labels == -1)] = 0
 
+        ''' minority_labels = labels[np.where(labels == 1)]
+        minority_sentences = sentences[np.where(labels == 1)]
+        labels = np.append(np.append(labels, minority_labels,axis=0),minority_labels,axis=0)
+        sentences = np.append(np.append(sentences, minority_sentences,axis=0),minority_sentences,axis=0)
+        '''
+        
+        return torch.tensor(sentences), torch.tensor(labels).squeeze()
+    
     def validation_split(self, validate):
         np.random.seed(0)
         ind = np.random.choice(len(self.labels), size = int(len(self.labels)*0.1))
@@ -53,6 +62,9 @@ class Get_Dataset(Dataset):
         else:
             self.sentences = np.delete(self.sentences,ind, axis=0)
             self.labels = np.delete(self.labels,ind)
+        
+        
+
 '''     
 dataset = tokenizer()
 trainset, testset = random_split(dataset, [0.8,0.2])
