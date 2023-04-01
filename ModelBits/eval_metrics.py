@@ -9,7 +9,7 @@ from network import *
 import time
 import os
 from get_dataset import Get_Dataset
-from sklearn.metrics import precision_recall_fscore_support
+from sklearn.metrics import precision_recall_fscore_support, accuracy_score
 
 path = os.path.dirname(os.path.abspath(__file__))
 
@@ -76,7 +76,8 @@ if __name__ == "__main__":
 
                     y_true.extend(test_labels.cpu().squeeze().tolist())
                     y_pred.extend(predicted.cpu().squeeze().tolist())
- 
+                
+                accuracy = accuracy_score(y_true, y_pred)
                 precision, recall, f1, _ = precision_recall_fscore_support(y_true, y_pred)
                 weighted_precision, weighted_recall, weighted_f1, _ = precision_recall_fscore_support(y_true, y_pred, average='weighted')
                 print('Epoch ' + str(epoch+1) + '\n, Pecision: {precision}, Recall : {recall}, F1: {f1}\n Weighted Pecision: {weighted_precision}, Weighted Recall : {weighted_recall}, Weighted F1: {weighted_f1}')
@@ -87,6 +88,7 @@ if __name__ == "__main__":
             weighted_precisions.append(weighted_precision)
             weighted_recalls.append(weighted_recall)
             weighted_f1s.append(weighted_f1)
+            accuracies.append(accuracy)
 
         validation_scores = dict(network = model.__class__.__name__,
         precision = np.mean(precisions), 
@@ -94,19 +96,34 @@ if __name__ == "__main__":
         f1_score = np.mean(f1s),
         weighted_precision = np.mean(weighted_precisions), 
         weighted_recall = np.mean(weighted_recalls), 
-        weighted_f1_score = np.mean(weighted_f1s))
+        weighted_f1_score = np.mean(weighted_f1s),
+        accuracies = np.mean(accuracies))
         
         validation_df = pd.DataFrame.from_dict(validation_scores)
 
         return validation_df
 
-    network1 = network1(input_size=input_size, hidden_size=hidden_size, L = L, batch_size = batch_size).to(device)
-    network1_df = evaluate(network1)
+    networks = [network1, network2, network3]
+    scores = pd.DataFrame()
 
-    network2 = network2(input_size=input_size, hidden_size=hidden_size, L = L, batch_size = batch_size).to(device)
-    network2_df = evaluate(network2)
+    for net in networks:
+        model_name = model.__class__.__name__
+        model = net(input_size=input_size, hidden_size=hidden_size, L=L, batch_size=batch_size).to(device)
+        df = evaluate(model)
+        assign(model_name, df)
+        scores = scores.append(df, ignore_index=True)
 
-    scores = network2.append(network2, ignore_index = True)
+    # network1 = network1(input_size=input_size, hidden_size=hidden_size, L = L, batch_size = batch_size).to(device)
+    # network1_df = evaluate(network1)
+
+    # network2 = network2(input_size=input_size, hidden_size=hidden_size, L = L, batch_size = batch_size).to(device)
+    # network2_df = evaluate(network2)
+
+    # network3 = network3(input_size=input_size, hidden_size=hidden_size, L = L, batch_size = batch_size).to(device)
+    # network3_df = evaluate(network3)
+
+    # scores = network1.append(network2, ignore_index = True)
+    # scores = scores.append(network3)
 
     print("Evaluation metrics:")
     print(scores)
