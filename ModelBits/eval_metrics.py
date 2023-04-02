@@ -10,6 +10,7 @@ import time
 import os
 from get_dataset import Get_Dataset
 from sklearn.metrics import precision_recall_fscore_support
+import csv
 
 path = os.path.dirname(os.path.abspath(__file__))
 
@@ -24,8 +25,8 @@ if __name__ == "__main__":
             device = torch.device('cpu')
         return device
     
-    trainset = Get_Dataset(train=True)
     testset = Get_Dataset(train=False)
+    testset0 = Get_Dataset(train=False, net0=True)
     
     batch_size = 4
     input_size = 768
@@ -33,18 +34,17 @@ if __name__ == "__main__":
     L = 3
     device = device()
 
-    testloader = DataLoader(testset, batch_size=batch_size, shuffle=True, num_workers=2, pin_memory = True, drop_last = True)
-
+    
     #checkpoint = torch.load(str(path) + '/Model/model1_checkpoint_epoch_5.pt')
     #model.load_state_dict(checkpoint['model_state_dict'])
 
-    def evaluate(net):
+    def evaluate(net, testset):
         
+        testloader = DataLoader(testset, batch_size=batch_size, shuffle=True, num_workers=2, pin_memory = True, drop_last = False)
+
         model = net
 
         ## loss and optimiser
-        criterion = torch.nn.CrossEntropyLoss()
-        optimizer = optim.SGD(model.parameters(), lr = 0.001, momentum=0.9)
         #scheduler = torch.optim.lr_scheduler.StepLR(optimizer, 2, gamma=0.5, last_epoch =- 1)
         t0 = time.time()
         
@@ -70,12 +70,18 @@ if __name__ == "__main__":
 
                 y_true.extend(test_labels.cpu().squeeze().tolist())
                 y_pred.extend(predicted.cpu().squeeze().tolist())
-
+                print('Batch ' + str((i+1)) + '/' + str(int(len(testset)/batch_size)) + ', Time from start: ' +str(time.time()-t0),end='\r')
+                
             precision, recall, f1, _ = precision_recall_fscore_support(y_true, y_pred)
+            print(precision, recall, f1)
             weighted_precision, weighted_recall, weighted_f1, _ = precision_recall_fscore_support(y_true, y_pred, average='weighted')
             accuracy = np.sum(np.array(y_true) == np.array(y_pred)) / len(y_true)
-            print('Precision: {precision}, Recall : {recall}, F1: {f1}\n Weighted Pecision: {weighted_precision}, Weighted Recall : {weighted_recall}, Weighted F1: {weighted_f1}')
-
+            
+            
+        
+        precision_dict = {'Precision': precision, 'Recall' : recall, 'F1': f1, 'Weighted Pecision': weighted_precision, 'Weighted Recall' : weighted_recall, 'Weighted F1': weighted_f1, 'Accuracy': accuracy}
+        '''
+        column_names = [precision]
         precisions.append(precision)
         recalls.append(recall)
         f1s.append(f1)
@@ -92,22 +98,45 @@ if __name__ == "__main__":
         weighted_recall = np.mean(weighted_recalls), 
         weighted_f1_score = np.mean(weighted_f1s), 
         accuracy = np.mean(accuracies))
-
-        validation_df = pd.DataFrame.from_dict(validation_scores)
-
-        return validation_df
-
+        
+        validation_df = pd.DataFrame(validation_scores,index=[0])
+        '''
+        return precision_dict
+    
+    
+    network0 = network0(input_size=input_size, hidden_size=hidden_size, L = L, batch_size = batch_size).to(device)
     network1 = network1(input_size=input_size, hidden_size=hidden_size, L = L, batch_size = batch_size).to(device)
-    network1_df = evaluate(network1)
-    '''
     network2 = network2(input_size=input_size, hidden_size=hidden_size, L = L, batch_size = batch_size).to(device)
-    network2_df = evaluate(network2)'''
+    network3 = network3(input_size=input_size, hidden_size=hidden_size, L = L, batch_size = batch_size).to(device)
 
-    #scores = network2.append(network2, ignore_index = True)
 
-    print("Evaluation metrics:")
-    print(network1_df)
-    #print(scores)
+    networks = [network0, network1, network2, network3]
+    for i,network in enumerate(networks):
+        if i==0:
+            test = testset0
+        else:
+            test = testset
+        if i>0:
+            break
+        model_state = torch.load(str(path) + '/Model/model' +str(i)+'.pt',map_location = torch.device('cpu'))
+        network.load_state_dict(model_state['model_state_dict'])
+        network_df = evaluate(network,test)
+
+        with open(path + '/Results/' +network.name + ".csv", "w", newline="") as fp:
+            # Create a writer object
+            writer = csv.DictWriter(fp, fieldnames=network_df.keys())
+
+            # Write the header row
+            writer.writeheader()
+
+            # Write the data rows
+            writer.writerow(network_df)
+            
+        
+
+
+
+
 
 
 

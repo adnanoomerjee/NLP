@@ -11,10 +11,11 @@ path = os.path.dirname(os.path.abspath(__file__))
 
 
 class Get_Dataset(Dataset):
-    def __init__(self, validate = False, train = True, pseudolabels = False):
+    def __init__(self, validate = False, train = True, pseudolabels = False, net0 = False):
         super().__init__()
         self.train = train
         self.pseudolabels = pseudolabels
+        self.net0 = net0
         self.sentences, self.labels = self.load_data()
         #self.validation_split(validate)
         
@@ -41,7 +42,12 @@ class Get_Dataset(Dataset):
         if self.pseudolabels == False:
             sentences = [sentences[i] for i in labelled_indices]
             labels = [labels[i] for i in labelled_indices]
+        if self.net0:
+            labels = np.array(labels).squeeze()
+            labels = labels - 1
+            labels[np.where(labels == -1)] = 0
 
+        
         return torch.tensor(sentences), torch.tensor(labels)
 
     def validation_split(self, validate):

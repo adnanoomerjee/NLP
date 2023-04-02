@@ -88,20 +88,20 @@ if __name__ == "__main__":
                     y_true.extend(test_labels.cpu().squeeze().tolist())
                     y_pred.extend(predicted.cpu().squeeze().tolist())
 
-                    print('Epoch ' + str(epoch+1) + ', Loss: ' + str(running_loss /(len(trainset)/batch_size)) + ', Running test: Batch ' + str(i+1) + '/' + str(int(len(testset)/batch_size)),end='\r')
+                    print('Epoch ' + str(epoch+1) + ', Loss: ' + str(running_loss /(len(testset)/batch_size)) + ', Running test: Batch ' + str(i+1) + '/' + str(int(len(testset)/batch_size)),end='\r')
  
                 precision, recall, f1, _ = precision_recall_fscore_support(y_true, y_pred)
                 accuracy = np.sum(np.array(y_true) == np.array(y_pred)) / len(y_true)
                 print(precision, recall, f1, accuracy)
                 
-                print('Epoch ' + str(epoch+1) + ', Loss: ' + str(running_loss /(len(trainset)/batch_size)) + ', Test set accuracy: ' + str(accuracy.item()))
+                print('Epoch ' + str(epoch+1) + ', Loss: ' + str(running_loss /(len(testset)/batch_size)) + ', Test set accuracy: ' + str(accuracy.item()))
             
                 
             print('')
         
             print('Training done.')
 
-            model_name =str(path) + '/Model/model1_checkpoint_epoch_' +str(epoch+1) +'.pt'
+            model_name =str(path) + '/Model/' + net.name + '_checkpoint_epoch_' +str(epoch+1) +'.pt'
 
             # save trained model
             #torch.save(model.state_dict(), model_name)
