@@ -40,7 +40,7 @@ if __name__ == "__main__":
 
     def evaluate(net, testset):
         
-        testloader = DataLoader(testset, batch_size=batch_size, shuffle=True, num_workers=2, pin_memory = True, drop_last = False)
+        testloader = DataLoader(testset, batch_size=batch_size, shuffle=True, num_workers=0, pin_memory = True, drop_last = False)
 
         model = net
 
@@ -73,13 +73,14 @@ if __name__ == "__main__":
                 print('Batch ' + str((i+1)) + '/' + str(int(len(testset)/batch_size)) + ', Time from start: ' +str(time.time()-t0),end='\r')
                 
             precision, recall, f1, _ = precision_recall_fscore_support(y_true, y_pred)
-            print(precision, recall, f1)
+            #print(precision, recall, f1)
             weighted_precision, weighted_recall, weighted_f1, _ = precision_recall_fscore_support(y_true, y_pred, average='weighted')
             accuracy = np.sum(np.array(y_true) == np.array(y_pred)) / len(y_true)
             
             
         
         precision_dict = {'Precision': precision, 'Recall' : recall, 'F1': f1, 'Weighted Pecision': weighted_precision, 'Weighted Recall' : weighted_recall, 'Weighted F1': weighted_f1, 'Accuracy': accuracy}
+        print(precision_dict)
         '''
         column_names = [precision]
         precisions.append(precision)
@@ -112,12 +113,13 @@ if __name__ == "__main__":
 
     networks = [network0, network1, network2, network3]
     for i,network in enumerate(networks):
-        if i==0:
+        a = 1
+        if i!=a:
+            continue
             test = testset0
         else:
             test = testset
-        if i>0:
-            break
+        
         model_state = torch.load(str(path) + '/Model/model' +str(i)+'.pt',map_location = torch.device('cpu'))
         network.load_state_dict(model_state['model_state_dict'])
         network_df = evaluate(network,test)
