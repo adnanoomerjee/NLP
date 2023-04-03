@@ -46,8 +46,7 @@ class Get_Dataset(Dataset):
             labels = np.array(labels).squeeze()
             labels = labels - 1
             labels[np.where(labels == -1)] = 0
-
-        
+            
         return torch.tensor(sentences), torch.tensor(labels)
 
     def validation_split(self, validate):
@@ -59,6 +58,7 @@ class Get_Dataset(Dataset):
         else:
             self.sentences = np.delete(self.sentences,ind, axis=0)
             self.labels = np.delete(self.labels,ind)
+
 '''     
 dataset = tokenizer()
 trainset, testset = random_split(dataset, [0.8,0.2])

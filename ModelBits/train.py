@@ -1,4 +1,3 @@
-import spacy
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -28,7 +27,7 @@ if __name__ == "__main__":
     testset = Get_Dataset(train=False, validate=True)
     
     batch_size = 4
-    epochs = 17
+    epochs = 15
     input_size = 768
     hidden_size = 768
     L = 3
@@ -38,23 +37,22 @@ if __name__ == "__main__":
     testloader = DataLoader(testset, batch_size=batch_size, shuffle=True, num_workers=2, pin_memory = True, drop_last = True)
 
 
-    #checkpoint = torch.load(str(path) + '/Model/model1_checkpoint_epoch_5.pt')
-    #model.load_state_dict(checkpoint['model_state_dict'])
-
-    def train(net):
+    def train(net, save=False):
         
         model = net
 
         ## loss and optimiser
         criterion = torch.nn.CrossEntropyLoss()
         optimizer = optim.SGD(model.parameters(), lr = 0.001, momentum=0.9)
-        #scheduler = torch.optim.lr_scheduler.StepLR(optimizer, 2, gamma=0.5, last_epoch =- 1)
+
         t0 = time.time()
+
         ## train
         for epoch in range(epochs):  # loop over the dataset multiple times
             
             running_loss = 0.0
             for i, (inputs, labels) in enumerate(trainloader, 0):
+
                 # get the inputs; data is a list of [inputs, labels]
                 inputs, labels = inputs.to(device), labels.to(device)
                 # zero the parameter gradients
@@ -69,14 +67,17 @@ if __name__ == "__main__":
                 
                 # print statistics
                 running_loss += float(loss.item())
+                if i%1000 == 0: #print update every 1000 batches
+                    print('Epoch ' + str(epoch+1) + ', Batch ' + str((i+1)) + '/' + str(int(len(trainset)/batch_size)) + ', loss: ' + str(running_loss /(i+1)) + ', Time from start: ' +str(time.time()-t0))
 
-                print('Epoch ' + str(epoch+1) + ', Batch ' + str((i+1)) + '/' + str(int(len(trainset)/batch_size)) + ', loss: ' + str(running_loss /(i+1)) + ', Time from start: ' +str(time.time()-t0),end='\r')
-            #scheduler.step()
+            print('Epoch ' + str(epoch+1) + ', Batch ' + str((i+1)) + '/' + str(int(len(trainset)/batch_size)) + ', loss: ' + str(running_loss /(i+1)) + ', Time from start: ' +str(time.time()-t0))
+
             print('')
 
             y_true = []
             y_pred = []
 
+            # run on test set
             with torch.no_grad():
                 
                 for i, data in enumerate(testloader, 0):
@@ -88,8 +89,9 @@ if __name__ == "__main__":
                     y_true.extend(test_labels.cpu().squeeze().tolist())
                     y_pred.extend(predicted.cpu().squeeze().tolist())
 
-                    print('Epoch ' + str(epoch+1) + ', Loss: ' + str(running_loss /(len(testset)/batch_size)) + ', Running test: Batch ' + str(i+1) + '/' + str(int(len(testset)/batch_size)),end='\r')
- 
+                    if i%100==0:
+                        print('Epoch ' + str(epoch+1) + ', Loss: ' + str(running_loss /(len(testset)/batch_size)) + ', Running test: Batch ' + str(i+1) + '/' + str(int(len(testset)/batch_size)))
+                print('Epoch ' + str(epoch+1) + ', Loss: ' + str(running_loss /(len(testset)/batch_size)) + ', Running test: Batch ' + str(i+1) + '/' + str(int(len(testset)/batch_size)))
                 precision, recall, f1, _ = precision_recall_fscore_support(y_true, y_pred)
                 accuracy = np.sum(np.array(y_true) == np.array(y_pred)) / len(y_true)
                 print(precision, recall, f1, accuracy)
@@ -103,25 +105,23 @@ if __name__ == "__main__":
 
             model_name =str(path) + '/Model/' + net.name + '_checkpoint_epoch_' +str(epoch+1) +'.pt'
 
-            # save trained model
-            #torch.save(model.state_dict(), model_name)
+            if save:
 
-            torch.save({
-            'epoch': epoch+1,
-            'model_state_dict': model.state_dict(),
-            'optimizer_state_dict': optimizer.state_dict(),
-            'loss': running_loss,
-            }, model_name)
-            
-            print('Model saved.')
+                torch.save({
+                'epoch': epoch+1,
+                'model_state_dict': model.state_dict(),
+                'optimizer_state_dict': optimizer.state_dict(),
+                'loss': running_loss,
+                }, model_name)
+                
+                print('Model saved.')
 
     network1 = network1(input_size=input_size, hidden_size=hidden_size, L = L, batch_size = batch_size).to(device)
     train(network1)
     network2 = network2(input_size=input_size, hidden_size=hidden_size, L = L, batch_size = batch_size).to(device)
     train(network2)
-    network3 = network3(input_size=input_size, hidden_size=hidden_size, L = L, batch_size = batch_size).to(device)
-    train(network3)
-
+    network0 = network0(input_size=input_size, hidden_size=hidden_size, L = L, batch_size = batch_size).to(device)
+    train(network1)
     
 
     
