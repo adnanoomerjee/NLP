@@ -113,7 +113,7 @@ if __name__ == "__main__":
 
     networks = [network0, network1, network2, network3]
     for i,network in enumerate(networks):
-        a = 1
+        a = 3
         if i!=a:
             continue
             test = testset0
