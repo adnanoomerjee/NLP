@@ -9,6 +9,13 @@ import numpy as np
 
 from transformers import AutoModel
 class network0(nn.Module):
+    '''
+    Network that only takes a target sentence S_T as input.
+
+    Embeds the target sentence using a BERT transformer.
+    Passes pooled output (CLS tokens) through a two layer MLP.
+    Outputs binary classification where 0 = NFS or NCS, 1 = CFS (as in the ClaimBuster Adversarial Transformer paper)
+    '''
     def __init__(self, input_size = 768, hidden_size = 768, L = 3, bidirectional = True, num_LSTM_layers = 1, dropout = 0.2, embed = 'bert-base-cased', batch_size = 4):
         super().__init__()
         self.name = 'model0'
@@ -64,6 +71,7 @@ class network1(nn.Module):
     Embeds three sentences.
     Passes pooled outputs (CLS tokens) of each  sentenceas a sequence to a Bi-LSTM. 
     Takes middle hidden state of Bi-LSTM and passes through a two layer MLP.
+    Outputs multiclass classification where 0 = NFS, 1 = NCS, 2 = CFS 
     '''
     def __init__(self, input_size, hidden_size, L = 3, bidirectional = True, num_LSTM_layers = 1, dropout = 0.2, embed = 'bert-base-cased', batch_size = 64):
         super().__init__()
@@ -114,6 +122,7 @@ class network2(nn.Module):
     Embeds three sentences using BERT transformers.
     Passes pooled outputs (CLS tokens) into two attention heads, computing attention between (S_T, S_P) and (S_T, S_F). 
     Concatenates outputs of attention heads and passes through a two layer MLP.
+    Outputs multiclass classification where 0 = NFS, 1 = NCS, 2 = CFS 
     '''
     def __init__(self, input_size = 768, hidden_size = 768, L = 3, bidirectional = True, num_att_heads = 1, dropout = 0.2, embed = 'bert-base-cased', batch_size = 4):
         super().__init__()
@@ -173,7 +182,8 @@ class network3(nn.Module):
 
     Embeds three sentences using BERT transformers.
     Passes pooled outputs (CLS tokens) into two attention heads, computing attention between (S_T, S_P) and (S_T, S_F). 
-    Concatenates outputs of attention heads and passes through a two layer MLP.
+    Concatenates outputs of attention heads AND S_T output of BERT layer and passes through a two layer MLP.
+    Outputs multiclass classification where 0 = NFS, 1 = NCS, 2 = CFS 
     '''
     def __init__(self, input_size = 768, hidden_size = 768, L = 3, bidirectional = True, num_att_heads = 1, dropout = 0.2, embed = 'bert-base-cased', batch_size = 4):
         super().__init__()
@@ -220,7 +230,7 @@ class network3(nn.Module):
         K2 = x[:,2,:].reshape((self.batch_size, self.input_size, 1))
         V2 = K2
 
-        Q = x[:,0,:].reshape((self.batch_size, self.input_size, 1))
+        Q = x[:,1,:].reshape((self.batch_size, self.input_size, 1))
        
         
         x1 = self.att1(Q,K1,V1)
