@@ -1,2 +1,4 @@
 *.pt 
 *.npy 
+/Data
+/Model
